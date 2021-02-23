@@ -1,9 +1,9 @@
 var createError = require('http-errors');
 var express = require('express');
 
-var indexRouter = require('./web/routes/index');
+const indexRouter = require('./web/routes/index');
 
-var app = express();
+const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,7 +23,6 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
 });
 
 module.exports = app;
