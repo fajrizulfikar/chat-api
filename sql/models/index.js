@@ -17,7 +17,33 @@ const createMessage = ({ db, params, callback }) => {
   });
 };
 
+const getSocketMessages = (db) => {
+  return new Promise((resolve, reject) => {
+    db.query(`SELECT * FROM messages ORDER BY id DESC 
+    LIMIT 10`, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
+  });
+};
+
+const createSocketMessage = ({ db, params }) => {
+  const { text, username } = params;
+
+  return new Promise((resolve, reject) => {
+    db.query(`INSERT INTO messages (text, username) VALUES ($1, $2)
+    RETURNING text, username, created_at`,
+    [text, username],
+    (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
+  });
+};
+
 module.exports = {
   getMessages,
   createMessage,
+  getSocketMessages,
+  createSocketMessage,
 };
