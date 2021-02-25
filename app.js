@@ -1,31 +1,38 @@
 const express = require('express');
-const indexRouter = require('./web/routes/index');
-const cors = require('cors');
 const socketIo = require('socket.io')();
+const cors = require('cors');
+const indexRouter = require('./web/routes/index');
+const Controller = require('./web/controllers/index');
 
-module.exports = (app, server) => {
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+const app = express();
+const server = require('http').Server(app);
 
-  app.use(cors());
+const port = '3000';
+app.set('port', port);
 
-  let io = socketIo.listen(server, {
-    cors: {
-      origin: 'http://localhost:3001',
-      methods: ["GET", "POST"],
-    },
-  });
+server.listen(port);
+server.on('listening', onListening);
 
-  app.io = io;
-  app.use(function(req, res, next) { 
-    'use strict';
-    req.io = io;
-    next();
-  });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  io.on('connection', (socket) => {
-    console.log('socket.io connection made');
-  });
+app.use(cors());
 
-  app.use('/', indexRouter);
-};
+let io = socketIo.listen(server, {
+  cors: {
+    origin: 'http://localhost:3001',
+    methods: ["GET", "POST"],
+  }
+});
+
+io.on('connection', Controller.openChatMessage);
+
+app.use('/', indexRouter);
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  console.log('Listening on ' + bind);
+}

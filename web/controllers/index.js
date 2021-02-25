@@ -19,17 +19,21 @@ const createMessage = (req, res) => {
       res.status(400);
     }
   }});
-  
-  req.io.on('chat message', (msg) => {
-    Model.createSocketMessage({ 
-      db, 
+};
+
+const openChatMessage = (io) => {
+  console.log('a user connected');
+
+  io.on('chat message', (msg) => {
+    Model.createSocketMessage({
+      db,
       params: JSON.parse(msg)
     })
-      .then(() => emitMostRecentMessages(req.io))
-      .catch((err) => req.io.emit(err));
+      .then(() => emitMostRecentMessages(io))
+      .catch((err) => io.emit(err));
   });
 
-  req.io.on('disconnect', () => {
+  io.on('disconnect', () => {
     console.log('socket.io connection terminated');
   });
 };
@@ -43,5 +47,5 @@ const emitMostRecentMessages = (io) => {
 module.exports = {
   getMessages,
   createMessage,
-  emitMostRecentMessages,
+  openChatMessage,
 };

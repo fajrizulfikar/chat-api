@@ -4,7 +4,8 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.json({ title: 'Hello world!' });
+  res.send('<h1>Hello world!</>')
+  // res.sendFile(__dirname + '/index.html');
 });
 
 router.get('/messages', Controller.getMessages);
