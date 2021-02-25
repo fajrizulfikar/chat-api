@@ -21,7 +21,31 @@ const createMessage = (req, res) => {
   }});
 };
 
+const openChatMessage = (io) => {
+  console.log('a user connected');
+
+  io.on('chat message', (msg) => {
+    Model.createSocketMessage({
+      db,
+      params: JSON.parse(msg)
+    })
+      .then(() => emitMostRecentMessages(io))
+      .catch((err) => io.emit(err));
+  });
+
+  io.on('disconnect', () => {
+    console.log('socket.io connection terminated');
+  });
+};
+
+const emitMostRecentMessages = (io) => {
+  Model.getSocketMessages(db)
+    .then((res) => io.emit('chat message', res))
+    .catch((err) => console.error(err));
+};
+
 module.exports = {
   getMessages,
   createMessage,
+  openChatMessage,
 };

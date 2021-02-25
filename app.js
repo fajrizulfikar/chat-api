@@ -1,28 +1,38 @@
-var createError = require('http-errors');
-var express = require('express');
-
+const express = require('express');
+const socketIo = require('socket.io')();
+const cors = require('cors');
 const indexRouter = require('./web/routes/index');
+const Controller = require('./web/controllers/index');
 
 const app = express();
+const server = require('http').Server(app);
+
+const port = '3000';
+app.set('port', port);
+
+server.listen(port);
+server.on('listening', onListening);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cors());
+
+let io = socketIo.listen(server, {
+  cors: {
+    origin: 'http://localhost:3001',
+    methods: ["GET", "POST"],
+  }
+});
+
+io.on('connection', Controller.openChatMessage);
+
 app.use('/', indexRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-});
-
-module.exports = app;
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  console.log('Listening on ' + bind);
+}
