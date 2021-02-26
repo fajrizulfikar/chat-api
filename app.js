@@ -7,7 +7,7 @@ const Controller = require('./web/controllers/index');
 const app = express();
 const server = require('http').Server(app);
 
-const port = '3000';
+const port = process.env.PORT || '8000';
 app.set('port', port);
 
 server.listen(port);
